@@ -50,6 +50,29 @@ def block():
 def unlock():
     window.attributes("-topmost", False)
 
+#Clear
+def delete_target():
+    with sqlite3.connect('db/database.db') as db:
+        cursor = db.cursor()
+        query = """ DELETE FROM targets """
+        query1 = """ DELETE FROM sqlite_sequence """
+        cursor.execute(query)
+        cursor.execute(query1)
+        db.commit()
+
+#Добавление
+def from_submit():
+    SN = sn_rite.get()
+    Action = action_box.get()
+    Punct = punct_box.get()
+    insert_target = (SN, Action, Punct)
+    with sqlite3.connect('db/database.db') as db:
+        cursor = db.cursor()
+        query = """ INSERT INTO targets(SN, Action, Punct) 
+                                        VALUES (?, ?, ?); """
+        cursor.execute(query, insert_target)
+        db.commit()
+
 #Флажки
 r_var = BooleanVar()
 r_var.set(0)
@@ -61,6 +84,7 @@ new_info.add_command(label = 'Info', command = show_info)
 new_info.add_separator()
 new_info.add_command(label = 'Refresh', command = refresh)
 window.bind('<F5>', refresh_bi)
+new_info.add_command(label = 'Clear', command = delete_target)
 new_info.add_separator()
 new_info.add_command(label = 'Export')
 new_info.add_separator()
@@ -81,19 +105,6 @@ block_men.add_radiobutton(label = 'Unlock', variable = r_var, value = 0, command
 new_window.add_cascade(label = 'Заблокувати екран', menu = block_men)
 menu.add_cascade(label = 'Window', menu = new_window)
 window.config(menu = menu)
-
-#Добавление
-def from_submit(__init__):
-    SN = sn_rite.get()
-    Action = action_box.get()
-    Punct = punct_box.get()
-    insert_target = (SN, Action, Punct)
-    with sqlite3.connect('db/database.db') as db:
-        cursor = db.cursor()
-        query = """ INSERT INTO targets(SN, Action, Punct) 
-                                        VALUES (?, ?, ?); """
-        cursor.execute(query, insert_target)
-        db.commit()
 
 #Data
 sn = Label(frame_add_data, text = 'SN:', font = ("Sylfaen", 10))
@@ -166,8 +177,7 @@ class Table(tk.Frame):
         table.configure(yscrollcommand=scrolltable.set)
         scrolltable.pack(side=tk.RIGHT, fill=tk.Y)
         table.pack(expand=tk.YES, fill=tk.BOTH)
-  
-  
+
 data = ()
 with sqlite3.connect('db/database.db') as db:
     cursor = db.cursor()
