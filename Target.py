@@ -82,6 +82,19 @@ new_window.add_cascade(label = 'Заблокувати екран', menu = block
 menu.add_cascade(label = 'Window', menu = new_window)
 window.config(menu = menu)
 
+#Добавление
+def from_submit(__init__):
+    SN = sn_rite.get()
+    Action = action_box.get()
+    Punct = punct_box.get()
+    insert_target = (SN, Action, Punct)
+    with sqlite3.connect('db/database.db') as db:
+        cursor = db.cursor()
+        query = """ INSERT INTO targets(SN, Action, Punct) 
+                                        VALUES (?, ?, ?); """
+        cursor.execute(query, insert_target)
+        db.commit()
+
 #Data
 sn = Label(frame_add_data, text = 'SN:', font = ("Sylfaen", 10))
 sn.pack()
@@ -102,9 +115,18 @@ action_box = ttk.Combobox(frame_add_data, state="readonly", values=[ "REPAIR",
 action_box.pack()
 action_box.place(x = 60, y = 43)
 
-add_but = Button(frame_add_data, text = 'Записати', font = ("Sylfaen", 10))
+punct = Label(frame_add_data, text = 'Punct', font = ("Sylfaen", 10))
+punct.pack()
+punct.place(x = 10, y = 70)
+punct_box = ttk.Combobox(frame_add_data, state = "readonly", values = ['0.5',
+                                                                        '1'],
+                                                                        font = ("Sylfaen", 9))
+punct_box.pack()
+punct_box.place(x = 60, y = 73)
+
+add_but = Button(frame_add_data, text = 'Записати', font = ("Sylfaen", 10), command = from_submit)
 add_but.pack()
-add_but.place(x = 10, y = 100)
+add_but.place(x = 10, y = 110)
 
 #Times
 def timing():
