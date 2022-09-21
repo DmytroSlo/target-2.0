@@ -8,47 +8,58 @@ from tkinter import *
 from tkinter import Menu
 from tkinter import messagebox as mb
 
+
 #Window
 window = Tk()
 window.title("Таргет")
-window.geometry("320x400")
+window.geometry("320x420")
 window.resizable(width=False, height=False)
+window.iconbitmap(r"logo.ico")
+
 
 #Block
 frame_add_data = tk.Frame(window, width = 320, height = 150)
 frame_add_statistics = tk.Frame(window, width = 320, height = 250, bg = 'orange')
+
 
 frame_add_data.pack()
 frame_add_data.place(x = 0, y = 0)
 frame_add_statistics.pack()
 frame_add_statistics.place(x = 0, y = 150)
 
+
 #Кнопки
 def show_info():
     msg = "Ця програма допомагає підраховувати новий таргет і була зроблена для ***"
     mb.showinfo("Info", msg)
+
 
 #Refresh
 def refresh():
     window.destroy()
     os.popen("target.py")
 
+
 #Refresh bind
 def refresh_bi(event):
     window.destroy()
     os.popen("target.py")
 
+
 #exit
 def exit_plik():
 	window.destroy()
+
 
 #Блокирование экрана
 def block():
     window.attributes("-topmost", True)
 
+
 #Разблокировка экрана
 def unlock():
     window.attributes("-topmost", False)
+
 
 #Clear
 def delete_target():
@@ -59,6 +70,7 @@ def delete_target():
         cursor.execute(query)
         cursor.execute(query1)
         db.commit()
+
 
 #Добавление
 def from_submit():
@@ -73,9 +85,13 @@ def from_submit():
         cursor.execute(query, insert_target)
         db.commit()
 
+    window.destroy()
+    os.popen("target.py")
+
 #Флажки
 r_var = BooleanVar()
 r_var.set(0)
+
 
 #Меню сверху
 menu = Menu(window)
@@ -91,12 +107,14 @@ new_info.add_separator()
 new_info.add_command(label = "Exit", command = exit_plik)
 menu.add_cascade(label = 'File', menu = new_info)
 
+
 new_comand = Menu(menu, tearoff = 0)
 new_comand.add_command(label ='F5                              Refresh')
 new_comand.add_command(label = 'Ctrl + E                     Export')
 new_comand.add_command(label = 'Alt + F4                    Exit')
 menu.add_cascade(label = 'Commands', menu = new_comand)
 window.config(menu = menu)
+
 
 new_window = Menu(menu, tearoff=0)
 block_men = Menu(menu, tearoff=0)
@@ -106,13 +124,15 @@ new_window.add_cascade(label = 'Заблокувати екран', menu = block
 menu.add_cascade(label = 'Window', menu = new_window)
 window.config(menu = menu)
 
+
 #Data
 sn = Label(frame_add_data, text = 'SN:', font = ("Sylfaen", 10))
 sn.pack()
 sn.place(x = 10, y = 10)
-sn_rite = Entry(frame_add_data, font = ("Sylfaen", 9))
+sn_rite = Entry(frame_add_data, validate = 'key', font = ("Sylfaen", 9))
 sn_rite.pack()
 sn_rite.place(x = 60, y = 13)
+
 
 action = Label(frame_add_data, text = "Action:", font = ("Sylfaen", 10))
 action.pack()
@@ -126,6 +146,7 @@ action_box = ttk.Combobox(frame_add_data, state="readonly", values=[ "REPAIR",
 action_box.pack()
 action_box.place(x = 60, y = 43)
 
+
 punct = Label(frame_add_data, text = 'Punct', font = ("Sylfaen", 10))
 punct.pack()
 punct.place(x = 10, y = 70)
@@ -135,9 +156,11 @@ punct_box = ttk.Combobox(frame_add_data, state = "readonly", values = ['0.5',
 punct_box.pack()
 punct_box.place(x = 60, y = 73)
 
+
 add_but = Button(frame_add_data, text = 'Записати', font = ("Sylfaen", 10), command = from_submit)
 add_but.pack()
 add_but.place(x = 10, y = 110)
+
 
 #Times
 def timing():
@@ -149,11 +172,13 @@ clock=Label(frame_add_data,font=("Sylfaen",16,"bold"))
 clock.place(x = 200, y = 6)
 timing()
 
+
 #Data 
 current_date = date.today().strftime("%d.%m.%Y")
 lbl = Label(frame_add_data, text= current_date, font = ("Sylfaen", 10, "bold"))
 lbl.pack()
 lbl.place(x = 237, y = 30)
+
 
 #Table
 class Table(tk.Frame):
@@ -178,14 +203,17 @@ class Table(tk.Frame):
         scrolltable.pack(side=tk.RIGHT, fill=tk.Y)
         table.pack(expand=tk.YES, fill=tk.BOTH)
 
+
 data = ()
 with sqlite3.connect('db/database.db') as db:
     cursor = db.cursor()
     cursor.execute("SELECT * FROM targets")
     data = (row for row in cursor.fetchall())
 
+
 table = Table(frame_add_statistics, headings=('ID', 'SN', 'Action', 'Punct'), rows=data)
 table.pack(expand=tk.YES, fill=tk.BOTH)
+
 
 #Подпись
 lbl = Label(window, text="by Dmytro Slobodian", font=("Sylfaen", 8))
@@ -193,9 +221,11 @@ lbl.pack()
 lbl.bind("<Button-1>", lambda e: callback("mailto:dmytro.slobodian@reconext.com"))
 lbl.place(x=0, y=378)
 
+
 lbl = Label(window, text="form Debug | Repair", font=("Sylfaen", 8))
 lbl.pack()
 lbl.bind("<Button-1>", lambda e: callback("https://www.reconext.com/"))
 lbl.place(x=210, y=378)
+
 
 window.mainloop()
