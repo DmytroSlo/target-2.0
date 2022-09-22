@@ -2,6 +2,8 @@ import tkinter as tk
 import os
 import sqlite3
 import time
+import webbrowser
+import pandas as pd
 from datetime import date
 from tkinter import ttk
 from tkinter import *
@@ -28,6 +30,11 @@ frame_add_statistics.pack()
 frame_add_statistics.place(x = 0, y = 150)
 
 
+#Гиперссылка
+def callback(url):
+    webbrowser.open_new(url)
+
+
 #Кнопки
 def show_info():
     msg = "Ця програма допомагає підраховувати новий таргет і була зроблена для ***"
@@ -35,13 +42,7 @@ def show_info():
 
 
 #Refresh
-def refresh():
-    window.destroy()
-    os.popen("target.py")
-
-
-#Refresh bind
-def refresh_bi(event):
+def refresh(event):
     window.destroy()
     os.popen("target.py")
 
@@ -71,6 +72,8 @@ def delete_target():
         cursor.execute(query1)
         db.commit()
 
+    window.destroy()
+    os.popen("target.py")
 
 #Добавление
 def from_submit():
@@ -88,6 +91,26 @@ def from_submit():
     window.destroy()
     os.popen("target.py")
 
+
+#Excport
+def export(event):
+    with sqlite3.connect('db/database.db') as db:
+        cursor = db.cursor()
+        query = """ SELECT * FROM targets """
+        cursor.execute(query)
+
+    columns = [desc[0] for desc in cursor.description]
+    data = cursor.fetchall()
+    df = pd.DataFrame(list(data), columns=columns)
+
+    writer = pd.ExcelWriter('Export/Targets.xlsx')
+    df.to_excel(writer, sheet_name='bar')
+    writer.save()
+
+
+    msg = "Файл було успішно експортовано до папки Export яка знаходиться в корені програми."
+    mb.showinfo("Експорт данних", msg)
+
 #Флажки
 r_var = BooleanVar()
 r_var.set(0)
@@ -99,10 +122,11 @@ new_info = Menu(menu, tearoff = 0)
 new_info.add_command(label = 'Info', command = show_info)
 new_info.add_separator()
 new_info.add_command(label = 'Refresh', command = refresh)
-window.bind('<F5>', refresh_bi)
+window.bind('<F5>', refresh)
 new_info.add_command(label = 'Clear', command = delete_target)
 new_info.add_separator()
-new_info.add_command(label = 'Export')
+new_info.add_command(label = 'Export', command = export)
+window.bind('<F1>', export)
 new_info.add_separator()
 new_info.add_command(label = "Exit", command = exit_plik)
 menu.add_cascade(label = 'File', menu = new_info)
@@ -110,7 +134,7 @@ menu.add_cascade(label = 'File', menu = new_info)
 
 new_comand = Menu(menu, tearoff = 0)
 new_comand.add_command(label ='F5                              Refresh')
-new_comand.add_command(label = 'Ctrl + E                     Export')
+new_comand.add_command(label = 'F1                              Export')
 new_comand.add_command(label = 'Alt + F4                    Exit')
 menu.add_cascade(label = 'Commands', menu = new_comand)
 window.config(menu = menu)
