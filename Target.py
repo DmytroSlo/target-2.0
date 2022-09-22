@@ -21,7 +21,7 @@ window.iconbitmap(r"logo.ico")
 
 #Block
 frame_add_data = tk.Frame(window, width = 320, height = 150)
-frame_add_statistics = tk.Frame(window, width = 320, height = 250, bg = 'orange')
+frame_add_statistics = tk.Frame(window, width = 320, height = 250)
 
 
 frame_add_data.pack()
@@ -74,6 +74,10 @@ def delete_target():
 
     window.destroy()
     os.popen("target.py")
+    
+    msg = "Всі дані були успішно видалені."
+    mb.showinfo("Очистка данних", msg)
+
 
 #Добавление
 def from_submit():
