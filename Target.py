@@ -37,7 +37,7 @@ def callback(url):
 
 #Кнопки
 def show_info():
-    msg = "Ця програма допомагає підраховувати новий таргет і була зроблена для ***"
+    msg = "Ця програма допомагає підраховувати новий таргет і була зроблена для техніків з відділу Debug/Repair"
     mb.showinfo("Info", msg)
 
 
@@ -113,7 +113,8 @@ def export():
     data = cursor.fetchall()
     df = pd.DataFrame(list(data), columns=columns)
 
-    writer = pd.ExcelWriter('Export/Targets.xlsx')
+    date_string = time.strftime("%Y-%m-%d")
+    writer = pd.ExcelWriter('Export/Targets-' + date_string + '.xlsx')
     df.to_excel(writer, sheet_name='bar')
     writer.save()
 
@@ -132,7 +133,8 @@ def export_bind(event):
     data = cursor.fetchall()
     df = pd.DataFrame(list(data), columns=columns)
 
-    writer = pd.ExcelWriter('Export/Targets.xlsx')
+    date_string = time.strftime("%d.%m.%Y")
+    writer = pd.ExcelWriter('Export/Targets ' + date_string + '.xlsx')
     df.to_excel(writer, sheet_name='bar')
     writer.save()
 

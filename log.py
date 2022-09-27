@@ -4,7 +4,7 @@ import tkinter as tk
 import os
 
 logins = ["Yurii.Shvets", "Roman.Tsiura", "Dmytro.Slobodian", "Oksana.Zhambazova"]
-passwords = ["D27092022R", "Pknce5h12sd", "1210012255", "1"]
+passwords = ["D27092022R", "Pknce5h12sd", "1210012255", "101184"]
 
 #функций которые должны производится при вводе логина и пароля
 def messagebox1():
