@@ -14,7 +14,7 @@ from tkinter import messagebox as mb
 #Window
 window = Tk()
 window.title("Таргет")
-window.geometry("320x420")
+window.geometry("320x420+500+500")
 window.resizable(width=False, height=False)
 window.iconbitmap(r"logo.ico")
 
@@ -42,7 +42,13 @@ def show_info():
 
 
 #Refresh
-def refresh(event):
+def refresh():
+    window.destroy()
+    os.popen("target.py")
+
+
+#Refresh
+def refresh_bind(event):
     window.destroy()
     os.popen("target.py")
 
@@ -97,7 +103,7 @@ def from_submit():
 
 
 #Excport
-def export(event):
+def export():
     with sqlite3.connect('db/database.db') as db:
         cursor = db.cursor()
         query = """ SELECT * FROM targets """
@@ -115,6 +121,26 @@ def export(event):
     msg = "Файл було успішно експортовано до папки Export яка знаходиться в корені програми."
     mb.showinfo("Експорт данних", msg)
 
+
+def export_bind(event):
+    with sqlite3.connect('db/database.db') as db:
+        cursor = db.cursor()
+        query = """ SELECT * FROM targets """
+        cursor.execute(query)
+
+    columns = [desc[0] for desc in cursor.description]
+    data = cursor.fetchall()
+    df = pd.DataFrame(list(data), columns=columns)
+
+    writer = pd.ExcelWriter('Export/Targets.xlsx')
+    df.to_excel(writer, sheet_name='bar')
+    writer.save()
+
+
+    msg = "Файл було успішно експортовано до папки Export яка знаходиться в корені програми."
+    mb.showinfo("Експорт данних", msg)
+
+
 #Флажки
 r_var = BooleanVar()
 r_var.set(0)
@@ -126,11 +152,11 @@ new_info = Menu(menu, tearoff = 0)
 new_info.add_command(label = 'Info', command = show_info)
 new_info.add_separator()
 new_info.add_command(label = 'Refresh', command = refresh)
-window.bind('<F5>', refresh)
+window.bind('<F5>', refresh_bind)
 new_info.add_command(label = 'Clear', command = delete_target)
 new_info.add_separator()
 new_info.add_command(label = 'Export', command = export)
-window.bind('<F1>', export)
+window.bind('<F1>', export_bind)
 new_info.add_separator()
 new_info.add_command(label = "Exit", command = exit_plik)
 menu.add_cascade(label = 'File', menu = new_info)
