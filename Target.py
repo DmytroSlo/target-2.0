@@ -2,8 +2,7 @@ import tkinter as tk
 import os
 import sqlite3
 import time
-import webbrowser
-import pandas as pd
+import command as com
 from datetime import date
 from tkinter import ttk
 from tkinter import *
@@ -28,17 +27,6 @@ frame_add_data.pack()
 frame_add_data.place(x = 0, y = 0)
 frame_add_statistics.pack()
 frame_add_statistics.place(x = 0, y = 150)
-
-
-#Гиперссылка
-def callback(url):
-    webbrowser.open_new(url)
-
-
-#Кнопки
-def show_info():
-    msg = "Ця програма допомагає підраховувати новий таргет і була зроблена для техніків з відділу Debug/Repair"
-    mb.showinfo("Info", msg)
 
 
 #Refresh
@@ -68,6 +56,32 @@ def unlock():
     window.attributes("-topmost", False)
 
 
+#Валидация
+def validation():
+    return len(sn_rite.get()) != 0 and len(action_box.get()) != 0 and len(punct_box.get()) != 0
+
+
+#Добавление
+def from_submit():
+    if validation():
+        SN = sn_rite.get()
+        Action = action_box.get()
+        Punct = punct_box.get()
+        insert_target = (SN, Action, Punct)
+        with sqlite3.connect('db/database.db') as db:
+            cursor = db.cursor()
+            query = """ INSERT INTO targets(SN, Action, Punct) 
+                                            VALUES (?, ?, ?); """
+            cursor.execute(query, insert_target)
+            db.commit()
+
+        window.destroy()
+        os.popen("target.py")
+    else:
+        msg = "Не всі поля є заповнені"
+        mb.showerror("Валідація", msg)
+
+
 #Clear
 def delete_target():
     with sqlite3.connect('db/database.db') as db:
@@ -85,64 +99,6 @@ def delete_target():
     mb.showinfo("Очистка данних", msg)
 
 
-#Добавление
-def from_submit():
-    SN = sn_rite.get()
-    Action = action_box.get()
-    Punct = punct_box.get()
-    insert_target = (SN, Action, Punct)
-    with sqlite3.connect('db/database.db') as db:
-        cursor = db.cursor()
-        query = """ INSERT INTO targets(SN, Action, Punct) 
-                                        VALUES (?, ?, ?); """
-        cursor.execute(query, insert_target)
-        db.commit()
-
-    window.destroy()
-    os.popen("target.py")
-
-
-#Excport
-def export():
-    with sqlite3.connect('db/database.db') as db:
-        cursor = db.cursor()
-        query = """ SELECT * FROM targets """
-        cursor.execute(query)
-
-    columns = [desc[0] for desc in cursor.description]
-    data = cursor.fetchall()
-    df = pd.DataFrame(list(data), columns=columns)
-
-    date_string = time.strftime("%Y-%m-%d")
-    writer = pd.ExcelWriter('Export/Targets-' + date_string + '.xlsx')
-    df.to_excel(writer, sheet_name='bar')
-    writer.save()
-
-
-    msg = "Файл було успішно експортовано до папки Export яка знаходиться в корені програми."
-    mb.showinfo("Експорт данних", msg)
-
-
-def export_bind(event):
-    with sqlite3.connect('db/database.db') as db:
-        cursor = db.cursor()
-        query = """ SELECT * FROM targets """
-        cursor.execute(query)
-
-    columns = [desc[0] for desc in cursor.description]
-    data = cursor.fetchall()
-    df = pd.DataFrame(list(data), columns=columns)
-
-    date_string = time.strftime("%d.%m.%Y")
-    writer = pd.ExcelWriter('Export/Targets ' + date_string + '.xlsx')
-    df.to_excel(writer, sheet_name='bar')
-    writer.save()
-
-
-    msg = "Файл було успішно експортовано до папки Export яка знаходиться в корені програми."
-    mb.showinfo("Експорт данних", msg)
-
-
 #Флажки
 r_var = BooleanVar()
 r_var.set(0)
@@ -151,14 +107,14 @@ r_var.set(0)
 #Меню сверху
 menu = Menu(window)
 new_info = Menu(menu, tearoff = 0)
-new_info.add_command(label = 'Info', command = show_info)
+new_info.add_command(label = 'Info', command = com.show_info)
 new_info.add_separator()
 new_info.add_command(label = 'Refresh', command = refresh)
 window.bind('<F5>', refresh_bind)
 new_info.add_command(label = 'Clear', command = delete_target)
 new_info.add_separator()
-new_info.add_command(label = 'Export', command = export)
-window.bind('<F1>', export_bind)
+new_info.add_command(label = 'Export', command = com.export)
+window.bind('<F1>', com.export_bind)
 new_info.add_separator()
 new_info.add_command(label = "Exit", command = exit_plik)
 menu.add_cascade(label = 'File', menu = new_info)
@@ -212,6 +168,13 @@ punct_box = ttk.Combobox(frame_add_data, state = "readonly", values = ['0.5',
 punct_box.pack()
 punct_box.place(x = 60, y = 73)
 
+target = Label(frame_add_data, text = "Таргет:", font = ("Sylfaen", 10))
+target.pack()
+target.place(x = 237, y = 70)
+
+target_box = Label(frame_add_data, text = com.target_stat, font = ("Sylfaen", 10))
+target_box.pack()
+target_box.place(x = 287, y = 70)
 
 add_but = Button(frame_add_data, text = 'Записати', font = ("Sylfaen", 10), command = from_submit)
 add_but.pack()
@@ -274,13 +237,13 @@ table.pack(expand=tk.YES, fill=tk.BOTH)
 #Подпись
 lbl = Label(window, text="by Dmytro Slobodian", font=("Sylfaen", 8))
 lbl.pack()
-lbl.bind("<Button-1>", lambda e: callback("mailto:dmytro.slobodian@reconext.com"))
+lbl.bind("<Button-1>", lambda e: com.callback("mailto:dmytro.slobodian@reconext.com"))
 lbl.place(x=0, y=378)
 
 
 lbl = Label(window, text="form Debug | Repair", font=("Sylfaen", 8))
 lbl.pack()
-lbl.bind("<Button-1>", lambda e: callback("https://www.reconext.com/"))
+lbl.bind("<Button-1>", lambda e: com.callback("https://www.reconext.com/"))
 lbl.place(x=210, y=378)
 
 
